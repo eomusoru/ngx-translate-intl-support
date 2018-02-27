@@ -1,30 +1,79 @@
 # ngx-translate-intl-support
-Base structure of a angular 5 app with ngx-translation and icu support
+
 =======
-# NgxTranslate
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.7.
+This project use ngx-translate library with ICU internationalization.
+ 
+First step run `npm install` to install all node dependencies. 
 
-## Development server
+Also take care of the fact that by default, this library use `HttModule` method and you will need to use the `HttpClientMdule`.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+**AppModule imports**
 
-## Code scaffolding
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+`import {HttpClient, HttpClientModule} from "@angular/common/http";
+ import {TranslateCompiler, TranslateModule, TranslateLoader} from "@ngx-translate/core";
+ import {TranslateHttpLoader} from "@ngx-translate/http-loader";
+ import {TranslateMessageFormatCompiler} from "ngx-translate-messageformat-compiler";
+ import {MESSAGE_FORMAT_CONFIG} from "ngx-translate-messageformat-compiler";`
+ 
+ 
+**Ng Module import declarations**
+ 
+ `imports: [
+    BrowserModule,
+    HttpClientModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      },
+      compiler: {
+        provide: TranslateCompiler,
+        useClass: TranslateMessageFormatCompiler
+      }
+    })
+  ],
+  providers: [
+    {provide: MESSAGE_FORMAT_CONFIG, useValue: {intlSupport: true}}
+  ],`
 
-## Build
+**Loader for a special json location**
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
 
-## Running unit tests
+`export function HttpLoaderFactory(http: HttpClient) {
+   return new TranslateHttpLoader(http, "./assets/i18n/", ".json");
+ }`
+ 
+ 
+ 
+ **Component**
+ 
+ `import {TranslateModule, TranslateLoader} from "@ngx-translate/core";
+  import {TranslateHttpLoader} from "@ngx-translate/http-loader";
+  import {TranslateService} from "@ngx-translate/core";
+  `
+  
+ `constructor(public translate: TranslateService) {
+     translate.setDefaultLang("en");
+      translate.use("en");
+   }
+ `
+ 
+ **Call**
+ 
+ `{{'things' | translate:"{ count: 2 }"}}`
+ 
+ 
+ **json**
+ 
+ `{
+   "HELLO": "hello {value}",
+   "translateMe": "Translate me",
+   "things": "There {count, plural, =0{is} one{is} other{are}} {count, plural, =0{} one{a} other{several}} {count, plural, =0{nothing} one{thing} other{things}}",
+   "people": "{gender, select, male{He is} female{She is} other{They are}} {how}"
+ }`
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
